@@ -22,7 +22,6 @@ Example output of this README: [README.html](README.html)
 
 ## To Do
 - [x] Links and Images.
-- [ ] Raw HTML
 - [ ] Nested bold and italics.
 - [ ] Tables (really?)
 
