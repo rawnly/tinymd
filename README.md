@@ -18,6 +18,8 @@ This compiler is intended to be as simple as possible. Right now supports just a
 - Code blocks
 - Code word
 
+Example output of this README: [README.html](README.html)
+
 ## To Do
 - [ ] Links and Images.
 - [ ] Raw HTML
