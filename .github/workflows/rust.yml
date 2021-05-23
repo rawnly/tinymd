@@ -1,0 +1,29 @@
+name: Update Docs
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build_docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: 'Setup git identity'
+      id: git-identity
+      run: |
+        git config user.email "$GTHUB_ACTOR@users.noreply.github.com"
+        git config user.name "CI / $GITHUB_ACTOR"
+    - name: Build docs
+      run: |
+        cargo run -q README.md docs/index.html
+        
+        git add -A .
+        git commit -a -m 'Docs Updated'
+        git push -u origin master
