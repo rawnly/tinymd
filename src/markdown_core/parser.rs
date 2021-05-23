@@ -21,7 +21,6 @@ pub fn parse_wrapper(
     }
 }
 
-
 pub fn parse_markdown_row(row: &str) -> String {
     let mut output = String::new();
 
@@ -29,6 +28,17 @@ pub fn parse_markdown_row(row: &str) -> String {
     let mut is_italic = false;
     let mut is_code = false;
     let mut is_underline = false;
+
+    // Anchor tag stuff
+
+    let mut is_image = false;
+
+    let mut is_link = false;
+    let mut is_link_text = false;
+    let mut is_link_url = false;
+
+    let mut link_text = String::new();
+    let mut link_url = String::new();
 
     for (idx, ch) in row.char_indices() {
         let char = String::from(ch);
@@ -39,7 +49,87 @@ pub fn parse_markdown_row(row: &str) -> String {
         let next_char : char;
         let prev_char : char;
 
+
         match &char[..] {
+            "!" => {
+                if is_last_char || is_code {
+                    output.push_str(&char);
+                    continue;
+                }
+
+                next_char = row
+                        .chars()
+                        .nth(idx + 1)
+                        .unwrap();
+
+                if next_char == '[' {
+                    is_image = true;
+                }
+            },
+            "[" => {
+                if is_last_char || is_code {
+                    output.push_str(&char);
+                    continue;
+                }
+
+                if !is_link {
+                    is_link = true;
+                    is_link_text = true;
+                    continue;
+                }
+
+                output.push_str(&char);
+            },
+            "]" => {
+                if is_last_char || is_code {
+                    output.push_str(&char);
+                    continue;
+                }
+
+                if is_link_text && (is_link || is_image) {
+                    is_link_text = false;
+                    continue;
+                }
+
+                output.push_str(&char);
+            },
+            "(" => {
+                if is_last_char || is_code {
+                    output.push_str(&char);
+                    continue;
+                }
+
+                if !is_link_url && (is_link || is_image) {
+                    is_link_url = true;
+                    continue;
+                }
+
+                output.push_str(&char);
+            },
+            ")" => {
+                if is_image {
+                    if is_link_url {
+                        is_link_url = false;
+                    }
+
+
+                    is_image = false;
+                    output.push_str(&format!("<img src=\"{}\" alt=\"{}\" />", link_url, link_text));
+                    continue;
+                }
+
+                if is_link {
+                    if is_link_url {
+                        is_link_url = false;
+                    }
+
+                    is_link = false;
+                    output.push_str(&format!("<a href=\"{}\">{}</a>", link_url, link_text));
+                    continue;
+                }
+
+                output.push_str(&char);
+            },
             "`" =>
                 parse_wrapper(
                     is_first_char,
@@ -133,7 +223,21 @@ pub fn parse_markdown_row(row: &str) -> String {
 
                 output.push_str(&char);
             },
-            _ => output.push_str(&char)
+            _ => {
+                if is_link {
+                    if is_link_text {
+                        link_text.push_str(&char);
+                    }
+
+                    if is_link_url {
+                        link_url.push_str(&char);
+                    }
+
+                    continue;
+                }
+
+                output.push_str(&char)
+            }
         }
     }
 

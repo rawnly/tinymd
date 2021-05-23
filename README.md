@@ -21,7 +21,7 @@ This compiler is intended to be as simple as possible. Right now supports just a
 Example output of this README: [README.html](README.html)
 
 ## To Do
-- [ ] Links and Images.
+- [x] Links and Images.
 - [ ] Raw HTML
 - [ ] Nested bold and italics.
 - [ ] Tables (really?)

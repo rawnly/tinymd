@@ -23,7 +23,8 @@ fn print_long_banner() {
     println!("Written by: {}", env!("CARGO_PKG_AUTHORS"));
     println!("Homepage: {}", env!("CARGO_PKG_HOMEPAGE"));
 
-    println!("Usage: tinymd <somefile.md>")
+    println!("Usage: tinymd <somefile.md> [path/to/output_file.html]");
+    println!("Example: tinymd README.md docs/index.html");
 }
 
 fn usage() {
@@ -47,8 +48,9 @@ fn check_tags(_htag: &mut bool, _ptag: &mut bool, output_line: &mut String, size
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
-    if args.len() != 2 {
-        println!("[ ERROR ] Invalid invocation!");
+    if args.len() < 2 {
+        println!("[ERROR] Invalid invocation! args: {:?}", args);
+        println!("---------------");
         usage();
         return;
     }
@@ -56,7 +58,7 @@ fn main() {
     let filename = &args[1];
 
     if !filename.ends_with(".md") {
-        println!("[ ERROR ] Not a valid ");
+        println!("[ERROR] Not a valid markdown file.");
         return;
     }
 
@@ -65,7 +67,19 @@ fn main() {
     println!("\n");
 
     let input_filename = Path::new(filename);
-    let output_filename = format!("{}.html", &filename[..filename.len() - 3]);
+    let output_filename: String;
+
+    if args.len() == 3 {
+        let name = &args[2];
+
+        if name.ends_with(".html") {
+            output_filename = format!("{}", name);
+        } else {
+            output_filename = format!("{}.html", name);
+        }
+    } else {
+        output_filename = format!("{}.html", &filename[..filename.len() - 3]);
+    }
 
     let file = match File::open(&input_filename) {
         Err(err) => panic!("Failed to open file. {}", err.to_string()),
